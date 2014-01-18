@@ -10,7 +10,7 @@
 (function (window, document) {
   'use strict';
 
-  var Spotlight  = Spotlight || function (elems, opts) {
+  var Spotlight  = Spotlight || function (elems, opts, fn) {
 
     var options = {
       overlayOpacity: opts.overlayOpacity || 0.8,
@@ -20,7 +20,8 @@
     cache = {
       overlay: null,
       elements: [],
-      placeholders: []
+      placeholders: [],
+      callback: fn
     },
     utils = {
       events: {
@@ -111,13 +112,13 @@
         document.body.appendChild(cache.overlay);
         utils.style.addAll(cache.overlay, overlay.styles);
         utils.events.addEvent(cache.overlay, 'click', function () {
-          utils.events.removeEvent(cache.overlay, 'click');
           overlay.remove();
           elements.removeAll();
         })
       },
       remove: function () {
         document.body.removeChild(cache.overlay);
+        cache.callback.call(this);
       },
       styles: {
         'backgroundColor': options.overlayColor,
@@ -214,7 +215,6 @@
           })
 
           // insert the placeholder and overlay the actual element
-          console.log(elem);
           parent.parentNode.insertBefore(elem, parent)
           elements.overlayElement(parent);
         };
@@ -248,6 +248,12 @@
       overlay.add();
       elements.add(elems);
       elements.addPlaceholdersToPage();
+    }
+
+    // Public methods
+    this.remove = function () {
+      overlay.remove();
+      elements.removeAll();
     }
 
     init(elems, opts);
